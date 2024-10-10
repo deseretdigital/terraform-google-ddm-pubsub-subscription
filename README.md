@@ -17,7 +17,6 @@ module "ddm-pubsub-subscription" {
   pubsub_service_account = {GKE_PUBSUB_SA_EMAIL}
   subscription_name      = {YOUR_SUBSCRIPTION_NAME}
   topic_id               = {PARENT_TOPIC_ID}
-  topic_name             = {PARENT_TOPIC_NAME}
 
   # Optional
   labels = {
@@ -58,7 +57,6 @@ module "pubsub_subscription_module" {
   version                = "~> 1.1.0"
   pubsub_service_account = "service-{NUMBERS}@gcp-sa-pubsub.iam.gserviceaccount.com"
   subscription_name      = "Example_SubscriptionName"
-  topic_name             = google_pubsub_topic.example.name
   topic_id               = google_pubsub_topic.example.id
   
   labels = {

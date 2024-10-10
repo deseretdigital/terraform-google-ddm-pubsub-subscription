@@ -36,11 +36,10 @@ No modules.
 | <a name="input_pubsub_service_account"></a> [pubsub\_service\_account](#input\_pubsub\_service\_account) | The service account to be used by the Pub/Sub system. Looks like 'service-<project-number>@gcp-sa-pubsub.iam.gserviceaccount.com'. | `string` | n/a | yes |
 | <a name="input_subscription_name"></a> [subscription\_name](#input\_subscription\_name) | The name of the subscription. | `string` | n/a | yes |
 | <a name="input_topic_id"></a> [topic\_id](#input\_topic\_id) | A reference to a Topic resource, of the form projects/{project}/topics/{{name}} (as in the id property of a google\_pubsub\_topic), or just a topic name if the topic is in the same project as the subscription. | `string` | n/a | yes |
-| <a name="input_topic_name"></a> [topic\_name](#input\_topic\_name) | The name of the topic. | `string` | n/a | yes |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
-| <a name="output_subscription_id"></a> [subscription\_id](#output\_subscription\_id) | n/a |
-| <a name="output_subscription_name"></a> [subscription\_name](#output\_subscription\_name) | n/a |
+| <a name="output_subscription_id"></a> [subscription\_id](#output\_subscription\_id) | The ID of the created subscription. |
+| <a name="output_subscription_name"></a> [subscription\_name](#output\_subscription\_name) | The name of the created subscription. |
