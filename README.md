@@ -11,7 +11,7 @@ We found that in order to follow the documentation for the provider, we were con
 ```hcl
 module "ddm-pubsub-subscription" {
   source  = "deseretdigital/ddm-pubsub-subscription/google"
-  version = "1.0.0"
+  version = "~> 1.1.0"
   
   # Required
   pubsub_service_account = {GKE_PUBSUB_SA_EMAIL}
@@ -55,7 +55,7 @@ resource "google_pubsub_topic" "example" {
 
 module "pubsub_subscription_module" {
   source                 = "deseretdigital/ddm-pubsub-subscription/google"
-  version                = "~> 1.0.0"
+  version                = "~> 1.1.0"
   pubsub_service_account = "service-{NUMBERS}@gcp-sa-pubsub.iam.gserviceaccount.com"
   subscription_name      = "Example_SubscriptionName"
   topic_name             = google_pubsub_topic.example.name
