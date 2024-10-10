@@ -1,10 +1,11 @@
 variable "labels" {
   description = "A set of key/value label pairs to assign to this Topic."
   type        = map(string)
+  default     = {}
 }
 
 variable "max_delivery_attempts" {
-  default     = 5
+  default     = 100
   description = "The maximum number of delivery attempts for any message. The value must be between 5 and 100."
   type        = number
 
@@ -22,6 +23,15 @@ variable "message_retention_duration" {
   validation {
     condition     = can(regex("^\\d+s$", var.message_retention_duration))
     error_message = "Value must be a duration represented in seconds. Example: 86400s"
+  }
+}
+
+variable "pubsub_service_account" {
+  description = "The service account to be used by the Pub/Sub system. Looks like 'service-<project-number>@gcp-sa-pubsub.iam.gserviceaccount.com'."
+  type        = string
+  validation {
+    condition     = can(regex("^service-\\d+@gcp-sa-pubsub\\.iam\\.gserviceaccount\\.com$", var.pubsub_service_account))
+    error_message = "value must be a valid service account email address."
   }
 }
 
