@@ -56,7 +56,7 @@ resource "google_pubsub_topic" "example" {
 module "pubsub_subscription_module" {
   source                 = "deseretdigital/ddm-pubsub-subscription/google"
   version                = "~> 1.0.0"
-  pubsub_service_account = "service-{NUMBERS}@gcp-sa-pubsub.iam.gserviceaccount.com
+  pubsub_service_account = "service-{NUMBERS}@gcp-sa-pubsub.iam.gserviceaccount.com"
   subscription_name      = "Example_SubscriptionName"
   topic_name             = google_pubsub_topic.example.name
   topic_id               = google_pubsub_topic.example.id
