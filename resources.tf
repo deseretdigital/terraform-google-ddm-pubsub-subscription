@@ -13,6 +13,22 @@ resource "google_pubsub_topic" "dead_letter_subscription_topic" {
   labels = var.labels
 }
 
+resource "google_pubsub_topic_iam_binding" "assign_pubsub_publisher" {
+  topic = google_pubsub_topic.dead_letter_subscription_topic.id
+  role  = "roles/pubsub.publisher"
+  members = [
+    "serviceAccount:${var.pubsub_service_account}",
+  ]
+}
+
+resource "google_pubsub_topic_iam_binding" "assign_pubsub_subscriber" {
+  topic = google_pubsub_topic.dead_letter_subscription_topic.id
+  role  = "roles/pubsub.subscriber"
+  members = [
+    "serviceAccount:${var.pubsub_service_account}",
+  ]
+}
+
 resource "google_pubsub_subscription" "dead_letter_subscription" {
   name  = "${var.subscription_name}_DeadLetter"
   topic = google_pubsub_topic.dead_letter_subscription_topic.id
