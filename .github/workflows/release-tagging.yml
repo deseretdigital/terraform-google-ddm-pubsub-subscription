@@ -34,7 +34,7 @@ jobs:
               with:
                 tag: ${{ needs.release-tag.outputs.RELEASE_TAG }}
                 name: Release ${{ needs.release-tag.outputs.RELEASE_TAG }}
-                body: ${{ needs.release-tag.outputs.RELEASE_TAG }}
+                generateReleaseNotes: true
 
     release-notifier:
       runs-on: ubuntu-latest
