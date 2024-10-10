@@ -49,8 +49,3 @@ variable "topic_id" {
     error_message = "value must be a reference to a Topic resource, of the form projects/{project}/topics/{{name}}."
   }
 }
-
-variable "topic_name" {
-  description = "The name of the topic."
-  type        = string
-}

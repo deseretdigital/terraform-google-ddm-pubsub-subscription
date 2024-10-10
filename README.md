@@ -1,4 +1,4 @@
-# Google PubSub Subscription
+# Google PubSub Subscription with Dead Letter
 
 This module create a Google PubSub Subscription as as well as a Topic/Subscription for Dead Letters. 
 
@@ -9,15 +9,14 @@ We found that in order to follow the documentation for the provider, we were con
 ### Basic Configuration:
 
 ```hcl
-module "ddm-pubsub-subscription" {
+module "pubsub_subscription_module" {
   source  = "deseretdigital/ddm-pubsub-subscription/google"
-  version = "1.0.0"
+  version = "~> 2.0.0"
   
   # Required
   pubsub_service_account = {GKE_PUBSUB_SA_EMAIL}
   subscription_name      = {YOUR_SUBSCRIPTION_NAME}
   topic_id               = {PARENT_TOPIC_ID}
-  topic_name             = {PARENT_TOPIC_NAME}
 
   # Optional
   labels = {
@@ -55,10 +54,9 @@ resource "google_pubsub_topic" "example" {
 
 module "pubsub_subscription_module" {
   source                 = "deseretdigital/ddm-pubsub-subscription/google"
-  version                = "~> 1.0.0"
+  version                = "~> 2.0.0"
   pubsub_service_account = "service-{NUMBERS}@gcp-sa-pubsub.iam.gserviceaccount.com"
   subscription_name      = "Example_SubscriptionName"
-  topic_name             = google_pubsub_topic.example.name
   topic_id               = google_pubsub_topic.example.id
   
   labels = {
