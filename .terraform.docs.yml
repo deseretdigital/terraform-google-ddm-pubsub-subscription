@@ -1,0 +1,7 @@
+formatter: "md tbl"
+
+output:
+  file: "./terraform-docs.md"
+  mode: replace
+  template: |-
+        {{ .Content }}
