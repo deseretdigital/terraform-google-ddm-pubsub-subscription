@@ -14,20 +14,17 @@ resource "google_pubsub_topic" "dead_letter_subscription_topic" {
   labels = var.labels
 }
 
-resource "google_pubsub_topic_iam_binding" "assign_pubsub_publisher" {
-  topic = google_pubsub_topic.dead_letter_subscription_topic.id
-  role  = "roles/pubsub.publisher"
-  members = [
-    "serviceAccount:${var.pubsub_service_account}",
-  ]
+resource "google_pubsub_topic_iam_member" "assign_pubsub_publisher" {
+  project = google_pubsub_topic.dead_letter_subscription_topic.project
+  topic   = google_pubsub_topic.dead_letter_subscription_topic.id
+  role    = "roles/pubsub.publisher"
+  member  = "serviceAccount:${var.pubsub_service_account}"
 }
 
-resource "google_pubsub_topic_iam_binding" "assign_pubsub_subscriber" {
-  topic = google_pubsub_topic.dead_letter_subscription_topic.id
-  role  = "roles/pubsub.subscriber"
-  members = [
-    "serviceAccount:${var.pubsub_service_account}",
-  ]
+resource "google_pubsub_subscription_iam_member" "assign_pubsub_subscriber" {
+  subscription = google_pubsub_subscription.subscription.id
+  role         = "roles/pubsub.subscriber"
+  member       = "serviceAccount:${var.pubsub_service_account}"
 }
 
 resource "google_pubsub_subscription" "dead_letter_subscription" {

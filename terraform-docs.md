@@ -1,5 +1,3 @@
-# Terraform-Docs
-
 ## Requirements
 
 | Name | Version |
