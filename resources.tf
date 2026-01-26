@@ -7,6 +7,10 @@ resource "google_pubsub_subscription" "subscription" {
     dead_letter_topic     = google_pubsub_topic.dead_letter_subscription_topic.id
     max_delivery_attempts = var.max_delivery_attempts
   }
+
+  depends_on = [
+    google_pubsub_topic_iam_member.assign_pubsub_publisher
+  ]
 }
 
 resource "google_pubsub_topic" "dead_letter_subscription_topic" {
