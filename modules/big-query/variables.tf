@@ -43,3 +43,14 @@ variable "use_topic_schema" {
   type        = bool
   default     = false
 }
+
+variable "max_delivery_attempts" {
+  default     = 10
+  description = "The maximum number of delivery attempts for any message. The value must be between 5 and 100."
+  type        = number
+
+  validation {
+    condition     = var.max_delivery_attempts >= 5 && var.max_delivery_attempts <= 100
+    error_message = "Value must be between 5 and 100."
+  }
+}
