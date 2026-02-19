@@ -1,3 +1,10 @@
+locals {
+  bigquery_table_parts = split(".", var.bigquery_table)
+  bigquery_project_id  = local.bigquery_table_parts[0]
+  bigquery_dataset_id  = local.bigquery_table_parts[1]
+  bigquery_table_id    = local.bigquery_table_parts[2]
+}
+
 resource "google_pubsub_subscription" "subscription" {
   name   = var.subscription_name
   topic  = var.topic_id
@@ -8,17 +15,21 @@ resource "google_pubsub_subscription" "subscription" {
     table            = var.bigquery_table
   }
 
-  depends_on = [google_project_iam_member.viewer, google_project_iam_member.editor]
+  depends_on = [google_bigquery_table_iam_member.viewer, google_bigquery_table_iam_member.editor]
 }
 
-resource "google_project_iam_member" "viewer" {
-  project = data.google_project.project.project_id
-  role    = "roles/bigquery.metadataViewer"
-  member  = "serviceAccount:${var.pubsub_service_account}"
+resource "google_bigquery_table_iam_member" "viewer" {
+  project    = local.bigquery_project_id
+  dataset_id = local.bigquery_dataset_id
+  table_id   = local.bigquery_table_id
+  role       = "roles/bigquery.metadataViewer"
+  member     = "serviceAccount:${var.pubsub_service_account}"
 }
 
-resource "google_project_iam_member" "editor" {
-  project = data.google_project.project.project_id
-  role    = "roles/bigquery.dataEditor"
-  member  = "serviceAccount:${var.pubsub_service_account}"
+resource "google_bigquery_table_iam_member" "editor" {
+  project    = local.bigquery_project_id
+  dataset_id = local.bigquery_dataset_id
+  table_id   = local.bigquery_table_id
+  role       = "roles/bigquery.dataEditor"
+  member     = "serviceAccount:${var.pubsub_service_account}"
 }
