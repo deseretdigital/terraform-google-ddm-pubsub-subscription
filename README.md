@@ -27,8 +27,12 @@ module "pubsub_subscription_module" {
 
   max_delivery_attempts      = {DEFAULT_100}
   message_retention_duration = {DEFAULT_2678400s}
+  retry_minimum_backoff      = {DEFAULT_null}
+  retry_maximum_backoff      = {DEFAULT_null}
 }
 ```
+
+Without `retry_minimum_backoff` and `retry_maximum_backoff`, Pub/Sub redelivers a nacked message immediately, so a subscriber that fails fast can burn through `max_delivery_attempts` in seconds and dead-letter a message during a short outage of one of its dependencies. Setting them (for example `"10s"` and `"600s"`) makes Pub/Sub wait and back off exponentially between attempts instead.
 
 This module creates a Google PubSub Subscription, a Google PubSub Topic for the dead letter messages, and a Google PubSub Subscription for the dead letters. It also applies the correct IAM bindings for the dead letter topic and subscription. 
 
