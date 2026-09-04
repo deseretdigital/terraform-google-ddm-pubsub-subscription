@@ -8,6 +8,14 @@ resource "google_pubsub_subscription" "subscription" {
     max_delivery_attempts = var.max_delivery_attempts
   }
 
+  dynamic "retry_policy" {
+    for_each = var.retry_minimum_backoff == null && var.retry_maximum_backoff == null ? [] : [1]
+    content {
+      minimum_backoff = var.retry_minimum_backoff
+      maximum_backoff = var.retry_maximum_backoff
+    }
+  }
+
   depends_on = [
     google_pubsub_topic_iam_member.assign_pubsub_publisher
   ]

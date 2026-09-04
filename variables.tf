@@ -49,3 +49,23 @@ variable "topic_id" {
     error_message = "value must be a reference to a Topic resource, of the form projects/{project}/topics/{{name}}."
   }
 }
+
+variable "retry_minimum_backoff" {
+  default     = null
+  description = "Minimum delay before Pub/Sub redelivers a message after a nack or an expired ack deadline, as a duration in seconds (for example \"10s\"). Between 0s and 600s. When neither retry_minimum_backoff nor retry_maximum_backoff is set, Pub/Sub redelivers immediately."
+  type        = string
+  validation {
+    condition     = var.retry_minimum_backoff == null || can(regex("^\\d+(\\.\\d+)?s$", var.retry_minimum_backoff))
+    error_message = "Value must be a duration represented in seconds. Example: 10s"
+  }
+}
+
+variable "retry_maximum_backoff" {
+  default     = null
+  description = "Maximum delay between redelivery attempts, as a duration in seconds (for example \"600s\"). Between 0s and 600s. Pub/Sub backs off exponentially from retry_minimum_backoff up to this value."
+  type        = string
+  validation {
+    condition     = var.retry_maximum_backoff == null || can(regex("^\\d+(\\.\\d+)?s$", var.retry_maximum_backoff))
+    error_message = "Value must be a duration represented in seconds. Example: 600s"
+  }
+}
