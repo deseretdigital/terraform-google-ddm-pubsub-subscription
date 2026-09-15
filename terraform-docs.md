@@ -8,7 +8,7 @@
 
 | Name | Version |
 | ---- | ------- |
-| <a name="provider_google"></a> [google](#provider\_google) | >= 6.5.0, < 8.0.0 |
+| <a name="provider_google"></a> [google](#provider\_google) | 7.46.1 |
 
 ## Modules
 
@@ -29,7 +29,8 @@ No modules.
 | Name | Description | Type | Default | Required |
 | ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_ack_deadline_seconds"></a> [ack\_deadline\_seconds](#input\_ack\_deadline\_seconds) | How long Pub/Sub waits for the subscriber to ack before redelivering, in seconds (10-600). Null uses the GCP default of 10s. The DDM subscriptions standard asks that this be set explicitly whenever the handler makes external HTTP calls that could outlive the default before the client library's ack-deadline auto-extension kicks in. | `number` | `null` | no |
-| <a name="input_expiration_policy_ttl"></a> [expiration\_policy\_ttl](#input\_expiration\_policy\_ttl) | How long the SUBSCRIPTION ITSELF survives with no activity before Pub/Sub DELETES it, as a duration (e.g. '2678400s'). Not to be confused with message\_retention\_duration, which governs messages rather than the subscription. Null keeps the GCP default of 31 days of inactivity; set to "" (empty string) to never expire — the right choice for a subscription whose consumer is expected to be idle for long stretches. | `string` | `null` | no |
+| <a name="input_dead_letter_message_retention_duration"></a> [dead\_letter\_message\_retention\_duration](#input\_dead\_letter\_message\_retention\_duration) | How long the auto-created <subscription\_name>\_DeadLetter subscription retains an unacked message. Null inherits message\_retention\_duration, so dead letters do not silently outlive the window configured for the primary subscription. Set it explicitly to diverge — wanting dead letters to live LONGER than the primary is a legitimate choice for an inspection queue, and stating it is better than inheriting it by accident. | `string` | `null` | no |
+| <a name="input_expiration_policy_ttl"></a> [expiration\_policy\_ttl](#input\_expiration\_policy\_ttl) | How long the SUBSCRIPTION ITSELF survives with no activity before Pub/Sub DELETES it, as a duration (e.g. '2678400s'). Not to be confused with message\_retention\_duration, which governs messages rather than the subscription. Null keeps the GCP default of 31 days of inactivity; set to "" (empty string) to never expire — the right choice for a subscription whose consumer is expected to be idle for long stretches. Pub/Sub enforces a floor of 1 day on a non-empty ttl; that is documented here rather than validated, because the exact floor was not verified against the API and a wrong constraint would reject a legal value. | `string` | `null` | no |
 | <a name="input_filter"></a> [filter](#input\_filter) | An expression matched against message ATTRIBUTES (never the body); only matching messages are delivered. Null delivers everything. Lets several consumers share one topic without each receiving and discarding the others' traffic. NOTE: GCP treats this as immutable — changing it destroys and recreates the subscription, which drops any unacked backlog. | `string` | `null` | no |
 | <a name="input_labels"></a> [labels](#input\_labels) | A set of key/value label pairs to assign to this Topic. | `map(string)` | `{}` | no |
 | <a name="input_max_delivery_attempts"></a> [max\_delivery\_attempts](#input\_max\_delivery\_attempts) | The maximum number of delivery attempts for any message. The value must be between 5 and 100. | `number` | `100` | no |

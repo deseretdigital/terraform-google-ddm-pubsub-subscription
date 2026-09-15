@@ -83,8 +83,11 @@ place — so an existing module call that sets none of them is unaffected.
 
 ```hcl
 module "pubsub_subscription_module" {
-  source                 = "deseretdigital/ddm-pubsub-subscription/google"
-  version                = "~> 2.0.0"
+  source = "deseretdigital/ddm-pubsub-subscription/google"
+  # Two-part constraint per platform/terraform/modules.md: patch and minor reach
+  # you without a PR, a major does not. A three-part `~> 2.2.0` would pin to
+  # patch-only and silently stop receiving minor releases.
+  version                = "~> 2.2"
   pubsub_service_account = "service-{NUMBERS}@gcp-sa-pubsub.iam.gserviceaccount.com"
   subscription_name      = "Example_SubscriptionName"
   topic_id               = google_pubsub_topic.example.id
@@ -116,3 +119,26 @@ module "pubsub_subscription_module" {
   expiration_policy_ttl = ""
 }
 ```
+
+#### The dead-letter subscription
+
+`message_retention_duration` and `expiration_policy_ttl` apply to the auto-created
+`<subscription_name>_DeadLetter` subscription as well as to the primary one — otherwise
+setting either would be honored on one of the two subscriptions this module creates and
+silently ignored on the other.
+
+Retention on the DLQ **inherits** the primary's value. A short window is often chosen for
+data minimization, and a dead letter is by definition a message that already failed —
+frequently the malformed or unexpected payload — so keeping a copy for a week after the
+primary dropped it is rarely what was intended.
+
+Override it when you want the opposite, which is a legitimate thing to want: this is the
+inspection queue for incident response, and dead letters outliving the primary is a
+defensible choice. It just reads better stated than inherited.
+
+```hcl
+  message_retention_duration            = "600s"    # primary: 10 minutes
+  dead_letter_message_retention_duration = "604800s" # dead letters: keep a week to investigate
+```
+
+Setting neither leaves both at GCP's defaults, unchanged.

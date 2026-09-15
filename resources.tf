@@ -64,4 +64,29 @@ resource "google_pubsub_subscription" "dead_letter_subscription" {
   name   = "${var.subscription_name}_DeadLetter"
   topic  = google_pubsub_topic.dead_letter_subscription_topic.id
   labels = var.labels
+
+  # The two new knobs reach this subscription too, on the same null-means-leave-
+  # GCP-alone terms as the primary. Without this, a caller who sets either one
+  # gets it honored on the primary and silently ignored here — an asymmetry this
+  # module would have introduced by adding the knobs to only one of the two
+  # subscriptions it creates.
+  #
+  # Retention defaults to the primary's rather than to its own null, so that a
+  # caller who shortens retention for data-minimization reasons does not keep a
+  # copy of every FAILED message — often the malformed or unexpected payload —
+  # for longer than the window they asked for. It stays overridable because the
+  # opposite preference is equally legitimate: this is the "inspection
+  # subscription" for incident response, and wanting dead letters to outlive the
+  # primary is a reasonable thing to state explicitly.
+  #
+  # Both still resolve to null when the caller sets nothing, so an existing
+  # caller's dead-letter subscription is unchanged by this.
+  message_retention_duration = var.dead_letter_message_retention_duration != null ? var.dead_letter_message_retention_duration : var.message_retention_duration
+
+  dynamic "expiration_policy" {
+    for_each = var.expiration_policy_ttl == null ? [] : [var.expiration_policy_ttl]
+    content {
+      ttl = expiration_policy.value
+    }
+  }
 }
