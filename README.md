@@ -26,7 +26,13 @@ module "pubsub_subscription_module" {
   }
 
   max_delivery_attempts      = {DEFAULT_100}
-  message_retention_duration = {DEFAULT_2678400s}
+
+  # All optional. Omitted means "leave GCP's own default alone".
+  message_retention_duration = {DEFAULT_null_meaning_GCP_7_days}
+  ack_deadline_seconds       = {DEFAULT_null_meaning_GCP_10s}
+  filter                     = {DEFAULT_null_meaning_deliver_everything}
+  expiration_policy_ttl      = {DEFAULT_null_meaning_GCP_31_days_idle}
+  retry_policy               = {DEFAULT_null_meaning_immediate_redelivery}
 }
 ```
 
@@ -67,5 +73,46 @@ module "pubsub_subscription_module" {
 
   max_delivery_attempts      = 10
   message_retention_duration = "84000s"
+}
+```
+
+#### Tuning delivery
+
+Every option below is optional, and omitting it leaves GCP's own default in
+place — so an existing module call that sets none of them is unaffected.
+
+```hcl
+module "pubsub_subscription_module" {
+  source                 = "deseretdigital/ddm-pubsub-subscription/google"
+  version                = "~> 2.0.0"
+  pubsub_service_account = "service-{NUMBERS}@gcp-sa-pubsub.iam.gserviceaccount.com"
+  subscription_name      = "Example_SubscriptionName"
+  topic_id               = google_pubsub_topic.example.id
+  max_delivery_attempts  = 10
+
+  # Drop an unacked message after 10 minutes (GCP's minimum). Suits a consumer
+  # reacting in real time, where a message old enough to have been missed is no
+  # longer worth acting on. Default is GCP's 7 days.
+  message_retention_duration = "600s"
+
+  # Deliver only messages whose ATTRIBUTES match, so several consumers can share
+  # one topic without each receiving and discarding the others' traffic.
+  # NOTE: immutable in GCP — changing it recreates the subscription and drops
+  # any unacked backlog.
+  filter = "attributes.channel = \"github\""
+
+  # Give the handler longer than GCP's 10s default to ack.
+  ack_deadline_seconds = 30
+
+  # Back off between redeliveries instead of hot-looping a transient downstream
+  # failure toward the dead-letter threshold.
+  retry_policy = {
+    minimum_backoff = "10s"
+    maximum_backoff = "600s"
+  }
+
+  # Never delete the subscription for inactivity. GCP's default DELETES it after
+  # 31 days idle — worth setting for a consumer that can be idle that long.
+  expiration_policy_ttl = ""
 }
 ```
