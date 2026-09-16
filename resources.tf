@@ -3,9 +3,38 @@ resource "google_pubsub_subscription" "subscription" {
   topic  = var.topic_id
   labels = var.labels
 
+  # Each of these is null by default, which omits the field and leaves GCP's own
+  # default in place — so a caller that sets none of them gets exactly the
+  # subscription this module produced before they existed.
+  message_retention_duration = var.message_retention_duration
+  ack_deadline_seconds       = var.ack_deadline_seconds
+  filter                     = var.filter
+
   dead_letter_policy {
     dead_letter_topic     = google_pubsub_topic.dead_letter_subscription_topic.id
     max_delivery_attempts = var.max_delivery_attempts
+  }
+
+  # dynamic, not a plain block with null fields: expiration_policy and
+  # retry_policy are blocks rather than attributes, so the only way to express
+  # "leave this to GCP" is to not emit the block at all.
+  #
+  # The empty-string ttl is meaningful and is why the condition tests for null
+  # specifically rather than truthiness — "" is how GCP spells "never expire",
+  # so it must still emit the block.
+  dynamic "expiration_policy" {
+    for_each = var.expiration_policy_ttl == null ? [] : [var.expiration_policy_ttl]
+    content {
+      ttl = expiration_policy.value
+    }
+  }
+
+  dynamic "retry_policy" {
+    for_each = var.retry_policy == null ? [] : [var.retry_policy]
+    content {
+      minimum_backoff = retry_policy.value.minimum_backoff
+      maximum_backoff = retry_policy.value.maximum_backoff
+    }
   }
 
   depends_on = [
@@ -35,4 +64,29 @@ resource "google_pubsub_subscription" "dead_letter_subscription" {
   name   = "${var.subscription_name}_DeadLetter"
   topic  = google_pubsub_topic.dead_letter_subscription_topic.id
   labels = var.labels
+
+  # The two new knobs reach this subscription too, on the same null-means-leave-
+  # GCP-alone terms as the primary. Without this, a caller who sets either one
+  # gets it honored on the primary and silently ignored here — an asymmetry this
+  # module would have introduced by adding the knobs to only one of the two
+  # subscriptions it creates.
+  #
+  # Retention defaults to the primary's rather than to its own null, so that a
+  # caller who shortens retention for data-minimization reasons does not keep a
+  # copy of every FAILED message — often the malformed or unexpected payload —
+  # for longer than the window they asked for. It stays overridable because the
+  # opposite preference is equally legitimate: this is the "inspection
+  # subscription" for incident response, and wanting dead letters to outlive the
+  # primary is a reasonable thing to state explicitly.
+  #
+  # Both still resolve to null when the caller sets nothing, so an existing
+  # caller's dead-letter subscription is unchanged by this.
+  message_retention_duration = var.dead_letter_message_retention_duration != null ? var.dead_letter_message_retention_duration : var.message_retention_duration
+
+  dynamic "expiration_policy" {
+    for_each = var.expiration_policy_ttl == null ? [] : [var.expiration_policy_ttl]
+    content {
+      ttl = expiration_policy.value
+    }
+  }
 }
